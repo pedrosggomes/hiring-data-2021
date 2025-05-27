@@ -1,0 +1,23 @@
+WITH DEPARTMENT_HIRES_2021 AS (
+    SELECT 
+        hired."DEPARTMENT_ID",
+        dep."DEPARTMENT",
+        COUNT(*) AS hired
+    FROM "DEV_EDW"."DBT__TEST_STG"."HIRED_EMPLOYEES" hired
+    LEFT JOIN "DEV_EDW"."DBT__TEST_STG"."DEPARTMENTS" dep
+        ON hired."DEPARTMENT_ID" = dep."ID"
+    WHERE YEAR(hired."DATETIME") = 2021
+      AND hired."DEPARTMENT_ID" IS NOT NULL
+    GROUP BY hired."DEPARTMENT_ID", dep."DEPARTMENT"
+)
+
+SELECT 
+    "DEPARTMENT_ID" AS id,
+    "DEPARTMENT" AS name,
+    hired
+FROM DEPARTMENT_HIRES_2021
+WHERE hired > (
+    SELECT AVG(hired)
+    FROM DEPARTMENT_HIRES_2021
+)
+ORDER BY hired DESC;
